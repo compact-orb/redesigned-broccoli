@@ -1,6 +1,6 @@
 $localEbuildDir = Join-Path -Path $PSScriptRoot -ChildPath "..\www-client\google-chrome"
 
-$headers["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+$headers = @{ authorization = "Bearer $env:GITHUB_TOKEN" }
 
 Write-Output -InputObject "Fetching upstream versions..."
 
