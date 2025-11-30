@@ -1,0 +1,56 @@
+name: Update Google Chrome Ebuild
+
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: '0 2 * * *'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+
+jobs:
+  update-chrome:
+    name: Update Google Chrome Ebuild
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update Google Chrome Ebuild
+        shell: pwsh
+        run: ./.scripts/Update-Chrome.ps1
+
+      - name: Check for Changes
+        id: check_changes
+        shell: pwsh
+        run: |
+          if (Test-Path "ChangesMade") {
+            "changes=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Remove-Item "ChangesMade"
+          } else {
+            "changes=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Generate Manifest
+        if: steps.check_changes.outputs.changes == true
+        uses: docker://gentoo/portage:latest
+        with:
+          args: >
+            /usr/bin/bash -c "
+            mkdir --parents /var/db/repos/redesigned-broccoli &&
+            cp --recursive . /var/db/repos/redesigned-broccoli &&
+            cd /var/db/repos/redesigned-broccoli/www-client/google-chrome &&
+            repoman manifest &&
+            cp Manifest /github/workspace/www-client/google-chrome/Manifest
+            "
+
+      - name: Commit and Push
+        if: steps.check_changes.outputs.changes == true
+        run: |
+          git config --global user.name  'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ./www-client/google-chrome/
+          git commit -m "Automated update of google-chrome ebuild"
+          git push
