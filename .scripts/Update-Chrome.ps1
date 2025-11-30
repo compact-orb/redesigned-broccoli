@@ -23,7 +23,6 @@ if (-not $newEbuilds -and -not $oldEbuilds) {
 }
 
 $wrapperCode = @"
-
 src_install() {
     upstream_src_install
 
