@@ -38,7 +38,7 @@ jobs:
         uses: docker://gentoo/portage:latest
         with:
           args: >
-            /usr/bin/bash -c "
+            /bin/bash -c "
             mkdir --parents /var/db/repos/redesigned-broccoli &&
             cp --recursive . /var/db/repos/redesigned-broccoli &&
             cd /var/db/repos/redesigned-broccoli/www-client/google-chrome &&
