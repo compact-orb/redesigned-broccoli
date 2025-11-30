@@ -8,6 +8,8 @@ $response = Invoke-RestMethod -Uri "https://api.github.com/repos/gentoo/gentoo/c
 
 $contents = $response | Where-Object { $_.name -like "*.ebuild" }
 
+$manifestRemote = $response | Where-Object { $_.name -eq "Manifest" }
+
 $localFiles = Get-ChildItem -Path $localEbuildDir -Filter "*.ebuild" | Select-Object -ExpandProperty Name
 
 $newEbuilds = $contents | Where-Object { $localFiles -notcontains $_.name }
@@ -54,5 +56,13 @@ foreach ($old in $oldEbuilds) {
 
     Remove-Item -Path (Join-Path -Path $localEbuildDir -ChildPath $old)
 }
+
+Write-Output -InputObject "Updating Manifest..."
+
+$manifestContent = Invoke-RestMethod -Uri $manifestRemote.download_url -Headers $headers
+
+$manifestPath = Join-Path -Path $localEbuildDir -ChildPath "Manifest"
+
+$manifestContent | Set-Content -Path $manifestPath
 
 New-Item -Path "ChangesMade" | Out-Null
