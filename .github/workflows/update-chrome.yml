@@ -34,7 +34,7 @@ jobs:
           }
 
       - name: Generate Manifest
-        if: steps.check_changes.outputs.changes == true
+        if: steps.check_changes.outputs.changes == 'true'
         uses: docker://gentoo/portage:latest
         with:
           args: >
@@ -47,7 +47,7 @@ jobs:
             "
 
       - name: Commit and Push
-        if: steps.check_changes.outputs.changes == true
+        if: steps.check_changes.outputs.changes == 'true'
         run: |
           git config --global user.name  'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
