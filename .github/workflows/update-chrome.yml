@@ -3,7 +3,7 @@ name: Update Google Chrome Ebuild
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 18 * * *
+    - cron: '0 18 * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
