@@ -22,14 +22,10 @@ if (-not $newEbuilds -and -not $oldEbuilds) {
     exit 0
 }
 
-# Widevine CDM version - update this when new version is released
-$widevineCdmVersion = "4.10.3029.0"
-
 $srcUriReplacement = @"
-WIDEVINE_CDM_PV="$widevineCdmVersion"
 SRC_URI="
 	https://dl.google.com/linux/chrome/deb/pool/main/g/`${MY_PN}/`${MY_P}_amd64.deb
-	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so -> libwidevinecdm-`${WIDEVINE_CDM_PV}.so
+	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so
 "
 "@
 
@@ -41,7 +37,7 @@ src_install() {
     
     local target_dir="`${ED}/opt/google/chrome/WidevineCdm/_platform_specific/linux_x64"
 
-    cp "`${DISTDIR}/libwidevinecdm-`${WIDEVINE_CDM_PV}.so" "`${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
+    cp "`${DISTDIR}/libwidevinecdm.so" "`${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
 }
 "@
 
@@ -79,8 +75,8 @@ $manifestContent = Invoke-RestMethod -Uri $manifestRemote.download_url -Headers 
 # Read local Manifest to preserve widevine entry
 $localManifestPath = Join-Path -Path $localEbuildDir -ChildPath "Manifest"
 $localManifest = Get-Content -Path $localManifestPath -Raw
-# Use multiline regex to match lines within the string
-$widevineMatch = [regex]::Match($localManifest, '(?m)^DIST libwidevinecdm-.*$')
+# Use multiline regex to match the widevine entry (non-versioned filename)
+$widevineMatch = [regex]::Match($localManifest, '(?m)^DIST libwidevinecdm\.so .*$')
 $widevineEntry = if ($widevineMatch.Success) { $widevineMatch.Value } else { $null }
 
 # Append widevine entry to upstream manifest

@@ -19,10 +19,9 @@ else
 fi
 
 MY_P="${MY_PN}_${PV}-1"
-WIDEVINE_CDM_PV="4.10.3029.0"
 SRC_URI="
 	https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_amd64.deb
-	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so -> libwidevinecdm-${WIDEVINE_CDM_PV}.so
+	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so
 "
 S=${WORKDIR}
 
@@ -139,5 +138,5 @@ src_install() {
     
     local target_dir="${ED}/opt/google/chrome/WidevineCdm/_platform_specific/linux_x64"
 
-    cp "${DISTDIR}/libwidevinecdm-${WIDEVINE_CDM_PV}.so" "${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
+    cp "${DISTDIR}/libwidevinecdm.so" "${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
 }
