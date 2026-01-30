@@ -22,6 +22,13 @@ if (-not $newEbuilds -and -not $oldEbuilds) {
     exit 0
 }
 
+$srcUriReplacement = @"
+SRC_URI="
+	https://dl.google.com/linux/chrome/deb/pool/main/g/`${MY_PN}/`${MY_P}_amd64.deb
+	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so
+"
+"@
+
 $wrapperCode = @"
 src_install() {
     upstream_src_install
@@ -30,7 +37,7 @@ src_install() {
     
     local target_dir="`${ED}/opt/google/chrome/WidevineCdm/_platform_specific/linux_x64"
 
-    cp "`${FILESDIR}/libwidevinecdm.so" "`${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
+    cp "`${DISTDIR}/libwidevinecdm.so" "`${target_dir}/libwidevinecdm.so" || die "Failed to copy custom libwidevinecdm.so"
 }
 "@
 
@@ -39,7 +46,12 @@ foreach ($ebuild in $newEbuilds) {
 
     $content = Invoke-RestMethod -Uri $ebuild.download_url -Headers $headers
 
+    # Replace src_install with upstream_src_install
     $patchedContent = $content -replace '(?m)^src_install\s*\(\)', 'upstream_src_install()'
+    
+    # Replace the SRC_URI block (single line) with our custom version that includes widevine
+    # The upstream ebuild has a single-line SRC_URI, so we can do a simple replacement
+    $patchedContent = $patchedContent -replace '(?m)^SRC_URI=.*$', $srcUriReplacement
 
     $finalContent = $patchedContent + "`n" + $wrapperCode
 
@@ -60,8 +72,18 @@ Write-Output -InputObject "Updating Manifest..."
 
 $manifestContent = Invoke-RestMethod -Uri $manifestRemote.download_url -Headers $headers
 
-$manifestPath = Join-Path -Path $localEbuildDir -ChildPath "Manifest"
+# Read local Manifest to preserve widevine entry
+$localManifestPath = Join-Path -Path $localEbuildDir -ChildPath "Manifest"
+$localManifest = Get-Content -Path $localManifestPath -Raw
+# Use multiline regex to match the widevine entry (non-versioned filename)
+$widevineMatch = [regex]::Match($localManifest, '(?m)^DIST libwidevinecdm\.so .*$')
+$widevineEntry = if ($widevineMatch.Success) { $widevineMatch.Value } else { $null }
 
-$manifestContent | Set-Content -Path $manifestPath
+# Append widevine entry to upstream manifest
+if ($widevineEntry) {
+    $manifestContent = $manifestContent.TrimEnd() + "`n" + $widevineEntry
+}
+
+$manifestContent | Set-Content -Path $localManifestPath
 
 New-Item -Path "ChangesMade" | Out-Null
