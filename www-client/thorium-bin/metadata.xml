@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>compact-orb@outlook.com</email>
+		<name>Compact Orb</name>
+	</maintainer>
+	<use>
+		<flag name="cpu_flags_x86_avx2">Install the AVX2 optimized binary for modern CPUs</flag>
+		<flag name="cpu_flags_x86_avx">Install the AVX optimized binary</flag>
+		<flag name="cpu_flags_x86_sse4_1">Install the SSE4.1 optimized binary</flag>
+		<flag name="cpu_flags_x86_sse3">Install the fallback SSE3 binary for older hardware</flag>
+		<flag name="qt6">Enable Qt6 integration via shim</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">Alex313031/thorium</remote-id>
+	</upstream>
+</pkgmetadata>
