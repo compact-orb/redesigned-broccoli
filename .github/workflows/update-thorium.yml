@@ -1,4 +1,4 @@
-name: Update Google Chrome Ebuild
+name: Update Thorium Ebuild
 
 on:
   workflow_dispatch:
@@ -10,19 +10,20 @@ env:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  update-chrome:
-    name: Update Google Chrome Ebuild
+  update-thorium:
+    name: Update Thorium Ebuild
 
     runs-on: ubuntu-24.04-arm
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Update Google Chrome Ebuild
+      - name: Update Thorium Ebuild
         shell: pwsh
-        run: ./.scripts/Update-Chrome.ps1
+        run: ./.scripts/Update-Thorium.ps1
 
       - name: Check for Changes
         id: check_changes
@@ -35,11 +36,13 @@ jobs:
             "changes=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
 
-      - name: Commit and Push
+      - name: Create Pull Request
         if: steps.check_changes.outputs.changes == 'true'
-        run: |
-          git config --global user.name  'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add ./www-client/google-chrome/
-          git commit -m "Automated update of google-chrome ebuild"
-          git push
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "www-client/thorium-bin: update to latest version"
+          title: "www-client/thorium-bin: update to latest version"
+          body: "Automated update of Thorium Browser (binary version) triggered by new upstream release."
+          branch: "update-thorium"
+          delete-branch: true
