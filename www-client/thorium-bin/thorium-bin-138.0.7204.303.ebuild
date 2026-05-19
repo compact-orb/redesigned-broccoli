@@ -102,7 +102,7 @@ src_unpack() {
 	:
 }
 
-upstream_src_install() {
+src_install() {
 	dodir /
 	cd "${ED}" || die
 	unpacker
@@ -130,15 +130,11 @@ upstream_src_install() {
 	fperms 4755 "/${CHROME_HOME}/chrome-sandbox"
 
 	pax-mark m "/${CHROME_HOME}/thorium-browser"
-}
 
-src_install() {
-    upstream_src_install
-
-    # Binary symlinks
-    dodir /usr/bin
-    dosym "/${CHROME_HOME}/thorium-browser" /usr/bin/thorium-browser
-    if [[ -f "${ED}/${CHROME_HOME}/thorium-shell" ]]; then
-        dosym "/${CHROME_HOME}/thorium-shell" /usr/bin/thorium-shell
-    fi
+	# Binary symlinks
+	dodir /usr/bin
+	dosym "/${CHROME_HOME}/thorium-browser" /usr/bin/thorium-browser
+	if [[ -f "${ED}/${CHROME_HOME}/thorium-shell" ]]; then
+		dosym "/${CHROME_HOME}/thorium-shell" /usr/bin/thorium-shell
+	fi
 }
