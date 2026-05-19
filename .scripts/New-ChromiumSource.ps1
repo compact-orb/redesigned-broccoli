@@ -4,6 +4,7 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $true
 
 $workingDir = Get-Location
 $depotToolsDir = Join-Path -Path $workingDir -ChildPath "depot_tools"
