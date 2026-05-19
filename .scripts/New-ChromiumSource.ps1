@@ -8,8 +8,9 @@ $ErrorActionPreference = "Stop"
 $workingDir = Get-Location
 $depotToolsDir = Join-Path -Path $workingDir -ChildPath "depot_tools"
 $chromiumDir = Join-Path -Path $workingDir -ChildPath "chromium"
+$tarballName = "chromium-$Version-linux.tar.zst"
 
-Write-Host -Object "--- Preparing Sources for Chromium $Version ---"
+Write-Host -Object "--- Creating Tarball for Chromium $Version ---"
 
 # 1. Install depot_tools
 if (-not (Test-Path $depotToolsDir)) {
@@ -38,27 +39,23 @@ git checkout -f "tags/$Version"
 Write-Host -Object "Syncing dependencies with gclient..."
 & gclient sync --with_branch_heads --with_tags --nohooks --no-history --force --reset --delete_unversioned_trees
 
-# 3. Cleanup to save space and keep git clean
-Write-Host -Object "Cleaning up all .git directories to prepare for push..."
+# 3. Cleanup to save space before tarballing
+Write-Host -Object "Cleaning up .git directories to save space..."
 Get-ChildItem -Path . -Filter ".git" -Recurse -Hidden | Remove-Item -Recurse -Force
 
-# 4. Prepare for Push to Branch
-Write-Host -Object "Initializing temporary git repo to push to branch..."
-git init
-git config user.name "github-actions[bot]"
-git config user.email "github-actions[bot]@users.noreply.github.com"
-git add .
-git commit -m "Chromium $Version sources"
+Write-Host -Object "Creating tarball $tarballName with zstd (long=31)..."
+# We move up and tar the 'src' directory but rename it in the archive to match Gentoo expectations
+Set-Location -Path ..
+Move-Item -Path "src" -Destination "chromium-$Version"
 
-$repoUrl = "https://x-access-token:$($env:GITHUB_TOKEN)@github.com/$($env:GITHUB_REPOSITORY).git"
-$branchName = "sources/chromium-$Version"
-$tagName = "chromium-$Version"
+tar --create --file=- "chromium-$Version" | zstd --long=31 -19 -T0 -o "../$tarballName"
 
-Write-Host -Object "Pushing sources to branch $branchName..."
-git push $repoUrl "HEAD:refs/heads/$branchName" --force --tags
+Set-Location -Path $workingDir
 
-Write-Host -Object "Tagging the release..."
-git tag $tagName
-git push $repoUrl $tagName --force
-
-Write-Host -Object "Successfully pushed Chromium $Version sources to branch and tag."
+if (Test-Path -Path $tarballName) {
+    $size = (Get-Item -Path $tarballName).Length / 1GB
+    Write-Host -Object "Successfully created $tarballName ($([math]::Round($size, 2)) MB)"
+}
+else {
+    throw "Failed to create tarball."
+}
