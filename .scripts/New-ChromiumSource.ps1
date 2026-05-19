@@ -26,7 +26,7 @@ if (-not (Test-Path -Path $chromiumDir)) {
 }
 Set-Location -Path $chromiumDir
 
-Write-Host -Object "Fetching Chromium source (Approx 20-30GB)..."
+Write-Host -Object "Fetching Chromium source..."
 & fetch --nohooks --no-history chromium
 
 Set-Location -Path "src"
