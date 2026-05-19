@@ -1,0 +1,26 @@
+name: New Chromium Source
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Chromium version tag to package'
+        required: true
+        default: '138.0.7204.303'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+
+jobs:
+  new-chromium-source:
+    name: New Chromium Source
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare Chromium Sources
+        shell: pwsh
+        run: ./.scripts/New-ChromiumSource.ps1 -Version "${{ github.event.inputs.version }}"
