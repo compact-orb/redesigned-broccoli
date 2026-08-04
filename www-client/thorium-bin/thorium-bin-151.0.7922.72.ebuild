@@ -107,10 +107,6 @@ src_install() {
 	cd "${ED}" || die
 	unpacker
 
-	# Cleanup cron/scripts not needed on Gentoo
-	rm -r etc/cron.daily || die "Failed to remove cron scripts"
-	rm -r "${CHROME_HOME}"/cron || die "Failed to remove cron scripts"
-
 	pushd "${CHROME_HOME}/locales" > /dev/null || die
 	chromium_remove_language_paks
 	popd > /dev/null || die
