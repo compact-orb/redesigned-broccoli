@@ -23,6 +23,9 @@ SRC_URI="
 	https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_amd64.deb
 	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so
 "
+	amd64? ( https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_amd64.deb )
+	arm64? ( https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_arm64.deb )
+"
 S=${WORKDIR}
 
 LICENSE="google-chrome"
@@ -80,7 +83,7 @@ pkg_nofetch() {
 
 pkg_pretend() {
 	# Protect against people using autounmask overzealously
-	use amd64 || die "google-chrome only works on amd64"
+	use amd64 || use arm64 || die "google-chrome only works on amd64"
 }
 
 pkg_setup() {
