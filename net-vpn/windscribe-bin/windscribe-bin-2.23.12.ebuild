@@ -19,6 +19,8 @@ KEYWORDS="-* ~amd64 ~arm64"
 RESTRICT="bindist mirror"
 
 RDEPEND="
+	acct-group/windscribe
+	acct-user/windscribe
 	sys-apps/dbus
 	sys-libs/glibc
 "
@@ -39,9 +41,19 @@ src_install() {
 	# Symlink CLI to PATH
 	dosym /opt/windscribe/windscribe-cli /usr/bin/windscribe-cli
 
-	# Remove the deb's preset file, not needed on Gentoo
-	rm -r "${ED}"/usr/lib/systemd/system-preset || die
+	# Create platform file required by windscribe-helper
+	dodir /etc/windscribe
+	if use amd64; then
+		echo "linux_deb_x64" > "${ED}"/etc/windscribe/platform || die
+	elif use arm64; then
+		echo "linux_deb_arm64" > "${ED}"/etc/windscribe/platform || die
+	fi
 
-	# Remove autostart entry (let user manage it)
-	rm -r "${ED}"/etc || die
+	# Set setgid permission on Windscribe GUI binary so it can communicate with helper
+	fowners :windscribe /opt/windscribe/Windscribe
+	fperms 2755 /opt/windscribe/Windscribe
+
+	# Remove the deb's preset file and non-standard autostart dir
+	rm -r "${ED}"/usr/lib/systemd/system-preset || die
+	rm -r "${ED}"/etc/windscribe/autostart || die
 }
