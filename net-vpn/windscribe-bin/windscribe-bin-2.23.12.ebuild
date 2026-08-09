@@ -16,7 +16,7 @@ S="${WORKDIR}"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~arm64"
-RESTRICT="bindist mirror"
+RESTRICT="bindist mirror strip"
 
 RDEPEND="
 	acct-group/windscribe
