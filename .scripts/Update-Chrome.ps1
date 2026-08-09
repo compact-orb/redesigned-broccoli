@@ -49,9 +49,8 @@ foreach ($ebuild in $newEbuilds) {
     # Replace src_install with upstream_src_install
     $patchedContent = $content -replace '(?m)^src_install\s*\(\)', 'upstream_src_install()'
     
-    # Replace the SRC_URI block (single line) with our custom version that includes widevine
-    # The upstream ebuild has a single-line SRC_URI, so we can do a simple replacement
-    $patchedContent = $patchedContent -replace '(?m)^SRC_URI=.*$', $srcUriReplacement
+    # Replace the SRC_URI block with our custom version that includes widevine
+    $patchedContent = $patchedContent -replace '(?s)^SRC_URI=".*?"', $srcUriReplacement
 
     $finalContent = $patchedContent + "`n" + $wrapperCode
 
