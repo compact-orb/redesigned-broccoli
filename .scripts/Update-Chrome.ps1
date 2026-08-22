@@ -50,7 +50,10 @@ foreach ($ebuild in $newEbuilds) {
     $patchedContent = $content -replace '(?m)^src_install\s*\(\)', 'upstream_src_install()'
     
     # Replace the SRC_URI block with our custom version that includes widevine
-    $patchedContent = $patchedContent -replace '(?s)^SRC_URI=".*?"', $srcUriReplacement
+    $patchedContent = $patchedContent -replace '(?ms)^SRC_URI=".*?"', $srcUriReplacement
+
+    # Remove arm64 support (I cannot easily test arm64)
+    $patchedContent = $patchedContent -replace '(?m)^KEYWORDS=".*?"', 'KEYWORDS="-* amd64"'
 
     $finalContent = $patchedContent + "`n" + $wrapperCode
 
@@ -70,6 +73,9 @@ foreach ($old in $oldEbuilds) {
 Write-Output -InputObject "Updating Manifest..."
 
 $manifestContent = Invoke-RestMethod -Uri $manifestRemote.download_url -Headers $headers
+
+# Filter out arm64 entries from upstream manifest
+$manifestContent = ($manifestContent -split "`n" | Where-Object { $_ -notmatch '_arm64\.deb' }) -join "`n"
 
 # Read local Manifest to preserve widevine entry
 $localManifestPath = Join-Path -Path $localEbuildDir -ChildPath "Manifest"

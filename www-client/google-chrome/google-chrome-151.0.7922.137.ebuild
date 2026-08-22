@@ -20,14 +20,14 @@ fi
 
 MY_P="${MY_PN}_${PV}-1"
 SRC_URI="
-	amd64? ( https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_amd64.deb )
-	arm64? ( https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_arm64.deb )
+	https://dl.google.com/linux/chrome/deb/pool/main/g/${MY_PN}/${MY_P}_amd64.deb
+	https://bookish-spork.compact-orb.ovh/local/libwidevinecdm.so
 "
 S=${WORKDIR}
 
 LICENSE="google-chrome"
 SLOT="0"
-KEYWORDS="-* amd64 arm64"
+KEYWORDS="-* amd64"
 
 IUSE="qt6 selinux"
 
